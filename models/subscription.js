@@ -7,9 +7,11 @@ const subscriptionSchema = new Schema({
     required: true,
   },
   expirationTime: {
+    type: String | null,
     required: true,
   },
   keys: {
+    type: [String],
     required: true,
   },
 }, {
