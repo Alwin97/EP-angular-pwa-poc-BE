@@ -42,21 +42,13 @@ app.post('/newsletter', (req, res) => {
   const notificationPayload = {
     "notification": {
       "title": "Angular News",
-      "body": "Newsletter Available!",
-      "icon": "assets/icons/icon-144x144.png",
       "data": {
-        "dateOfArrival": Date.now(),
-        "primaryKey": 1
+        "url": "https://www.ecg-oberwiehl.de/"
       },
-      "actions": [{
-        "action": "explore",
-        "title": "Go to the site"
-      }]
     }
   };
 
-  Promise.all(allSubscriptions.map(sub => webpush.sendNotification(
-    sub, JSON.stringify(notificationPayload))))
+  Promise.all(allSubscriptions.map(sub => webpush.sendNotification(sub, JSON.stringify(notificationPayload))))
     .then(() => res.status(200).json({message: 'Newsletter sent successfully.'}))
     .catch(err => {
       console.error("Error sending notification, reason: ", err);
