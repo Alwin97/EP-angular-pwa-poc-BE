@@ -1,7 +1,9 @@
 const express = require('express')
 const webpush = require('web-push');
 const cors = require('cors');
-const bodyParser = require('body-parser')
+const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
+const Subscription = require('./models/subscription');
 
 const vapidKeys = {
   "publicKey": "BK50oaFrXUMC5p9jknpbzY7tCWuwGkAu6eQYe-UNDuTgmdEHQYiJCVHBuQY21_KpO80ctgvW3Fq_qgB_gl_EDR0",
@@ -18,26 +20,31 @@ webpush.setVapidDetails(
   vapidKeys.privateKey
 );
 
+// set port to listen for requests
+const PORT = process.env.PORT || 8080;
+
+const databaseUri = 'mongodb+srv://admin:nimda@ep-projekt-database.9tmj5.mongodb.net/myFirstDatabase?retryWrites=true&w=majority'
+mongoose.connect(databaseUri)
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log('Server is running on Port', PORT)
+    })
+  })
+  .catch(err => console.log(err));
+
 app.post('/notifications', (req, res) => {
-  console.log('test');
   console.log(req.body);
-  res.status(200).json({message: "Subscription added successfully."});
+  new Subscription(req.body).save()
+    .then(() => {
+      res.status(200).json({message: "Subscription added successfully."});
+    })
+    .catch(() => {
+      console.log('Error creating subscription');
+      res.status(500).json({message: 'Error creating subscription'})
+    })
 })
 
 app.post('/newsletter', (req, res) => {
-
-  const allSubscriptions = [
-    {
-      endpoint: 'https://fcm.googleapis.com/fcm/send/c8EzBCQHW1I:APA91bGw0gsG-J_nRsiup5NdzqakWmGUygdtVu3SsvPF3lyHzIOYNoeb_C8b4qnBqtNnUN14gwqQj97bdZao4hXJb336b-NoHzbh6D9NQwJ7Rz2KHAkVNmKTyO9IePn2ScPW7Y7AAO7r',
-      expirationTime: null,
-      keys: {
-        p256dh: 'BAfxkd580ggdyPI18W6TdAIVmAFB6aGu-GpX11qHmAR2777jgoiWr1Ug824FWrCMoH0RJyovl-dV2JeE1mub75o',
-        auth: 'Zn1w2lnBI38TJtQhkfE6PA',
-      }
-    }
-  ]
-
-  console.log('Total subscriptions', allSubscriptions.length);
 
   const notificationPayload = {
     "notification": {
@@ -48,17 +55,12 @@ app.post('/newsletter', (req, res) => {
     }
   };
 
-  Promise.all(allSubscriptions.map(sub => webpush.sendNotification(sub, JSON.stringify(notificationPayload))))
-    .then(() => res.status(200).json({message: 'Newsletter sent successfully.'}))
-    .catch(err => {
-      console.error("Error sending notification, reason: ", err);
-      res.sendStatus(500);
-    });
-})
-
-// set port to listen for requests
-const PORT = process.env.PORT || 8080;
-
-app.listen(PORT, () => {
-  console.log(`app listening at http://localhost:${PORT}`)
+  Subscription.find({}).exec().then(data => {
+    Promise.all(data.map(sub => webpush.sendNotification(sub, JSON.stringify(notificationPayload))))
+      .then(() => res.status(200).json({message: 'Newsletter sent successfully.'}))
+      .catch(err => {
+        console.error("Error sending notification, reason: ", err);
+        res.sendStatus(500);
+      });
+  })
 })
