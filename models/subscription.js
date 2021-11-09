@@ -7,12 +7,20 @@ const subscriptionSchema = new Schema({
     required: true,
   },
   expirationTime: {
-    type: String | null,
-    required: true,
+    type: String,
+    default: null,
+    required: true
   },
   keys: {
-    type: [String],
-    required: true,
+    p256dh: {
+      type: String,
+      required: true
+    },
+    auth: {
+      type: String,
+      required: true
+    },
+    required: true
   },
 });
 
