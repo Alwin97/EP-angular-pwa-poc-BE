@@ -34,7 +34,7 @@ mongoose.connect(databaseUri)
 
 app.post('/notifications', (req, res) => {
   console.log(req.body);
-  new Subscription(req.body).save()
+  new Subscription(req.body.sub).save()
     .then(() => {
       res.status(200).json({message: "Subscription added successfully."});
     })
