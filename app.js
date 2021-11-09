@@ -46,9 +46,9 @@ app.post('/notifications', (req, res) => {
 
 app.post('/newsletter', (req, res) => {
 
-  const notificationPayload = req.notification;
+  const notificationPayload = req.body.notification;
   console.log(notificationPayload);
-  res.status(200);
+  res.status(200).send;
 
   // Subscription.find({}).exec().then(data => {
   //   Promise.all(data.map(sub => webpush.sendNotification(sub, JSON.stringify(notificationPayload))))
