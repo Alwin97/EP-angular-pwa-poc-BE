@@ -47,15 +47,13 @@ app.post('/notifications', (req, res) => {
 app.post('/newsletter', (req, res) => {
 
   const notificationPayload = req.body.notification;
-  console.log(notificationPayload);
-  res.status(200).send;
 
-  // Subscription.find({}).exec().then(data => {
-  //   Promise.all(data.map(sub => webpush.sendNotification(sub, JSON.stringify(notificationPayload))))
-  //     .then(() => res.status(200).json({message: 'Newsletter sent successfully.'}))
-  //     .catch(err => {
-  //       console.error("Error sending notification, reason: ", err);
-  //       res.sendStatus(500);
-  //     });
-  // })
+  Subscription.find({}).exec().then(data => {
+    Promise.all(data.map(sub => webpush.sendNotification(sub, JSON.stringify(notificationPayload))))
+      .then(() => res.status(200).json({message: 'Newsletter sent successfully.'}))
+      .catch(err => {
+        console.error("Error sending notification, reason: ", err);
+        res.sendStatus(500);
+      });
+  })
 })
