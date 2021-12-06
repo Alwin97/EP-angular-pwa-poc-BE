@@ -1,3 +1,4 @@
+// schema for subcription object used by mongoDB database
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
